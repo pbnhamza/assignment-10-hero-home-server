@@ -27,7 +27,17 @@ async function run() {
     const heroCollection = db.collection("hero");
     //all data find
     app.get("/hero", async (req, res) => {
-      const result = await heroCollection.find().toArray().sort({ Price: -1 });
+      const result = await heroCollection.find().sort({ Price: -1 }).toArray();
+
+      res.send(result);
+    });
+    //Latest 6 card home page
+    app.get("/latest-hero", async (req, res) => {
+      const result = await heroCollection
+        .find()
+        .sort({ Price: -1 })
+        .limit(6)
+        .toArray();
 
       res.send(result);
     });
@@ -43,6 +53,35 @@ async function run() {
       const data = req.body;
       const result = await heroCollection.insertOne(data);
       res.send({ success: true, result });
+    });
+    //update
+    app.put("/hero/:id", async (req, res) => {
+      const { id } = req.params;
+      const data = req.body;
+      // console.log(id)
+      // console.log(data)
+      const objectId = new ObjectId(id);
+      const filter = { _id: objectId };
+      const update = {
+        $set: data,
+      };
+
+      const result = await heroCollection.updateOne(filter, update);
+
+      res.send({
+        success: true,
+        result,
+      });
+    });
+    // service delete
+    app.delete("/hero/:id", async (req, res) => {
+      const { id } = req.params;
+      const result = await heroCollection.deleteOne({ _id: new ObjectId(id) });
+
+      res.send({
+        success: true,
+        result,
+      });
     });
 
     await client.db("admin").command({ ping: 1 });
