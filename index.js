@@ -53,7 +53,6 @@ async function run() {
       const result = await bookingCollection.deleteOne({
         _id: new ObjectId(id),
       });
-
       res.send({
         success: true,
         result,
