@@ -24,7 +24,6 @@ async function run() {
     const db = client.db("hero-db");
     const heroCollection = db.collection("hero");
     const bookingCollection = db.collection("bookings");
-
     //book API
 
     app.get("/bookings/:id", async (req, res) => {
