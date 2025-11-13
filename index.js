@@ -94,7 +94,6 @@ async function run() {
       const update = {
         $set: data,
       };
-
       const result = await heroCollection.updateOne(filter, update);
       res.send({
         success: true,
