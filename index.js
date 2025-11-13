@@ -96,7 +96,6 @@ async function run() {
       };
 
       const result = await heroCollection.updateOne(filter, update);
-
       res.send({
         success: true,
         result,
@@ -112,7 +111,6 @@ async function run() {
         result,
       });
     });
-
     // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB! hello"
