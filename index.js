@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 3000;
 
@@ -8,10 +9,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-//user: hero-db
-//password: uthPnQqN4OUS9LDr
-const uri =
-  "mongodb+srv://hero-db:uthPnQqN4OUS9LDr@cluster0.3r2qvfc.mongodb.net/?appName=Cluster0";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.3r2qvfc.mongodb.net/?appName=Cluster0`;
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -25,20 +23,52 @@ async function run() {
 
     const db = client.db("hero-db");
     const heroCollection = db.collection("hero");
+    const bookingCollection = db.collection("bookings");
+
+    //book API
+
+    app.get("/bookings/:id", async (req, res) => {
+      const { id } = req.params;
+      console.log(id);
+      const result = await bookingCollection.findOne({ _id: new ObjectId(id) });
+      res.send({ success: true, result });
+    });
+
+    app.post("/bookings", async (req, res) => {
+      const data = req.body;
+      console.log("req body", data);
+      const result = await bookingCollection.insertOne(data);
+      res.send({ success: true, result });
+    });
+
+    //get bookings
+    app.get("/bookings", async (req, res) => {
+      const result = await bookingCollection.find().toArray();
+      res.send(result);
+    });
+
+    //delete
+    app.delete("/bookings/:id", async (req, res) => {
+      const { id } = req.params;
+      const result = await bookingCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+
+      res.send({
+        success: true,
+        result,
+      });
+    });
+    //All Hero API
     //all data find
     app.get("/hero", async (req, res) => {
-      const result = await heroCollection.find().sort({ Price: -1 }).toArray();
+      const result = await heroCollection.find().limit(6).toArray();
 
       res.send(result);
     });
-    //Latest 6 card home page
+    //Latest card home page
     app.get("/latest-hero", async (req, res) => {
-      const result = await heroCollection
-        .find()
-        .sort({ Price: -1 })
-        .limit(6)
-        .toArray();
-
+      const result = await heroCollection.find().sort({ Price: -1 }).toArray();
       res.send(result);
     });
     //get only one data
@@ -58,8 +88,7 @@ async function run() {
     app.put("/hero/:id", async (req, res) => {
       const { id } = req.params;
       const data = req.body;
-      // console.log(id)
-      // console.log(data)
+
       const objectId = new ObjectId(id);
       const filter = { _id: objectId };
       const update = {
@@ -84,9 +113,9 @@ async function run() {
       });
     });
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
+      "Pinged your deployment. You successfully connected to MongoDB! hello"
     );
   } finally {
     // Ensures that the client will close when you finish/error
